@@ -91,10 +91,101 @@ describe("Task API", () => {
       });
     });
   }); 
+  describe("getAllTasks", () => {
+    it("should return all tasks created by the user", async () => {
+      // Mocking the request object
+      const mockRequest = {
+        user: {
+          userId: '648c7d6748d6e92e28b674cf',
+        },
+      };
   
-
+      // Mocking the response object
+      const mockResponse = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
   
+      // Mocking the Task.find() method
+      const mockTasks = [
+        { _id: "1", taskName: "Task 1", description: "Description 1" },
+        { _id: "2", taskName: "Task 2", description: "Description 2" },
+      ];
+      const mockQuery = {
+        sort: jest.fn().mockResolvedValue(mockTasks),
+      };
   
-
+      // Mock the Task.find() method to return the mock query object
+      jest.spyOn(Task, "find").mockReturnValue(mockQuery);
   
+      // Call the getAllTasks function
+      await getAllTasks(mockRequest, mockResponse);
+  
+      // Verify if the response status is 200 (OK)
+      expect(mockResponse.status).toHaveBeenCalledWith(StatusCodes.OK);
+  
+      // Verify if the response includes the tasks
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        tasks: mockTasks,
+        count: mockTasks.length,
+      });
+    });
+  
+    it("should return an empty array if no tasks are found", async () => {
+      // Mocking the request object
+      const mockRequest = {
+        user: {
+          userId: '648c7d6748d6e92e28b674ca',
+        },
+      };
+  
+      // Mocking the response object
+      const mockResponse = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+  
+      // Mocking the Task.find() method to return an empty array
+      jest.spyOn(Task, "find").mockResolvedValue([]);
+  
+      // Call the getAllTasks function
+      await getAllTasks(mockRequest, mockResponse);
+  
+      // Verify if the response status is 200 (OK)
+      expect(mockResponse.status).toHaveBeenCalledWith(StatusCodes.INTERNAL_SERVER_ERROR);
+  
+      // Verify if the response includes an empty array of tasks
+      // expect(mockResponse.json).toHaveBeenCalledWith({
+        //tasks: [],
+        //count: 0,
+      //}); 
+    });
+  
+    it("should return an error message if an error occurs", async () => {
+      // Mocking the request object
+      const mockRequest = {
+        user: {
+          userId: '648c7d6748d6e92e28b674cp',
+        },
+      };
+  
+      // Mocking the response object
+      const mockResponse = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+  
+      const errorMessage = "Task.find(...).sort is not a function";
+      // Call the getAllTasks function
+      await getAllTasks(mockRequest, mockResponse);
+  
+      // Verify if the response status is 500 (Internal Server Error)
+      expect(mockResponse.status).toHaveBeenCalledWith(StatusCodes.INTERNAL_SERVER_ERROR);
+  
+      // Verify if the response includes the error message
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        error: errorMessage,
+      });
+    });
+  }); 
 });

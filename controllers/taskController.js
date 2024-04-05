@@ -21,6 +21,20 @@ const addTask = async (req, res) => {
     }
   };
 
+  const getAllTasks = async (req, res) => {
+    try {
+      
+      const tasks = await Task.find({ createdBy: req.user.userId }).sort(
+        "createdAt"
+      );
+      console.log("Hi ",tasks)
+      res.status(StatusCodes.OK).json({ tasks, count: tasks.length });
+    } catch (error) {
+      console.log("Hi ",error.message)
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
+    }
+  };
+
   module.exports = {
     addTask,
     deleteTask,
