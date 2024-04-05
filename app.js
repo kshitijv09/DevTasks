@@ -9,7 +9,7 @@ require("express-async-errors");
 const connectDB = require("./db/connect");
 const authenticateUser = require("./middleware/authentication");
 
-const authRouter = require("./routes/auth");
+const authRouter = require("./routes/auth.js");
 const taskRouter = require("./routes/task");
 
 // error handler
