@@ -188,4 +188,62 @@ describe("Task API", () => {
       });
     });
   }); 
+
+  describe("updateTask", () => {
+    const updatedTaskData = {
+      taskName: "Updated Task",
+      date: new Date(),
+      description: "This is an updated task",
+      completed: "Completed",
+    };
+    
+    // Mock request object with task ID and updated data
+    const mockRequest = {
+      body: updatedTaskData,
+      user: { userId: "user_id_here" },
+      params: { id: "existing_task_id" },
+    };
+    
+    // Mock response object
+    const mockResponse = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    it("should update an existing task", async () => {
+      // Mock existing task
+      const existingTask = {
+        _id: "existing_task_id",
+        taskName: "Test Task",
+        date: new Date(),
+        description: "This is a test task",
+        completed: "Pending",
+        createdBy: "user_id_here",
+      };
+  
+      // Mock findByIdAndUpdate method to return the updated task
+      jest.spyOn(Task, "findByIdAndUpdate").mockResolvedValue(existingTask);
+  
+      // Call the updateTask function
+      await updateTask(mockRequest, mockResponse);
+  
+      // Verify if the response status is OK
+      expect(mockResponse.status).toHaveBeenCalledWith(StatusCodes.OK);
+  
+      // Verify if the response includes the updated task
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        task: existingTask,
+      });
+    });
+  
+    it("should return a 404 error if task to update is not found", async () => {
+      // Mock findByIdAndUpdate method to return null (indicating task not found)
+      jest.spyOn(Task, "findByIdAndUpdate").mockResolvedValue(null);
+  
+      // Call the updateTask function
+      await updateTask(mockRequest, mockResponse);
+  
+      // Verify if the response status is NOT_FOUND
+      expect(mockResponse.status).toHaveBeenCalledWith(StatusCodes.NOT_FOUND);
+    });
+  });
 });
