@@ -35,6 +35,64 @@ const addTask = async (req, res) => {
     }
   };
 
+  const updateTask = async (req, res) => {
+    try {
+      const {
+        body: { completed },
+        user: { userId },
+        params: { id: taskId },
+      } = req;
+  
+      if (completed === "") {
+        throw new BadRequestError("Completed Field cannot be empty");
+      }
+  
+      // Find the task by ID and update it
+      const task = await Task.findByIdAndUpdate(
+        taskId,
+        { ...req.body, createdBy: userId }, // Include userId for validation
+        { new: true, runValidators: true }
+      );
+  
+      if (!task) {
+        throw new NotFoundError(`No task found with id ${taskId}`);
+      }
+  
+      res.status(StatusCodes.OK).json({ task });
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        res.status(StatusCodes.NOT_FOUND).json({ error: error.message });
+      } else {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
+      }
+    }
+  };
+  
+  
+  const deleteTask = async (req, res) => {
+    try {
+      const {
+        user: { userId },
+        params: { id: taskId },
+      } = req;
+      console.log("Req is ",req)
+      // Find the task by ID and delete it
+      const task = await Task.findByIdAndRemove(taskId);
+  
+      if (!task) {
+        throw new NotFoundError(`No task found with id ${taskId}`);
+      }
+  
+      res.status(StatusCodes.OK).send();
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        res.status(StatusCodes.NOT_FOUND).json({ error: error.message });
+      } else {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
+      }
+    }
+  };
+
   module.exports = {
     addTask,
     deleteTask,
